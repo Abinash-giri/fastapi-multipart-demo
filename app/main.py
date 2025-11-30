@@ -115,5 +115,13 @@ async def upload_multiple_files(files: List[UploadFile] = File(...)):
 
 
 # ===== LAMBDA HANDLER =====
-handler = Mangum(app)
+def custom_handler(event, context):
+    print("EVENT: ", event)
+    print("Lambda handler triggered")
+    logger.info("Logger is working!")
+
+    return Mangum(app)(event, context)
+
+#handler = Mangum(app)
+handler = custom_handler
 
