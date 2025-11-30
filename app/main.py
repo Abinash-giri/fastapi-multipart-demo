@@ -1,4 +1,5 @@
-
+import sys
+import traceback
 import uuid
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from mangum import Mangum
@@ -12,11 +13,13 @@ from dotenv import load_dotenv
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s || %(levelname)s || %(name)s || %(message)s'
+    format='%(asctime)s || %(levelname)s || %(name)s || %(message)s',
+    stream=sys.stdout
 )
 logger = logging.getLogger("fastapi-multipart-demo")
 
 app = FastAPI()
+handler = Mangum(app)
 
 # ===== CONFIG =====
 load_dotenv()
@@ -67,6 +70,7 @@ async def upload_file(file: UploadFile = File(...)):
         }
 
     except Exception as e:
+        traceback.print_exc()
         logger.error(f"Error uploading file {file.filename}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -104,6 +108,7 @@ async def upload_multiple_files(files: List[UploadFile] = File(...)):
             })
 
         except Exception as e:
+            traceback.print_exc()
             logger.error(f"Error uploading file {file.filename}: {e}")
             upload_results.append({
                 "file_name": file.filename,
@@ -115,13 +120,13 @@ async def upload_multiple_files(files: List[UploadFile] = File(...)):
 
 
 # ===== LAMBDA HANDLER =====
-def custom_handler(event, context):
+def lambda_handler(event, context):
     print("EVENT: ", event)
     print("Lambda handler triggered")
     logger.info("Logger is working!")
 
-    return Mangum(app)(event, context)
+    return handler(event, context)
 
 #handler = Mangum(app)
-handler = custom_handler
+#handler = custom_handler
 

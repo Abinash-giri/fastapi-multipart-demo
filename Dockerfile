@@ -10,4 +10,4 @@ RUN poetry install --only main --no-root
 
 COPY app app
 
-CMD ["app.main.handler"]
+CMD ["app.main.lambda_handler"]
